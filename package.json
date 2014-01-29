@@ -1,0 +1,13 @@
+{
+  "name": "espial",
+  "version": "0.0.0",
+  "description": "Deal simple service discovery",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Norman Joyner <norman.joyner@gmail.com>",
+  "dependencies": {
+    "getmac": "~1.0.6"
+  }
+}
