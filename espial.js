@@ -4,10 +4,7 @@ var EventEmitter = require("eventemitter2").EventEmitter2;
 var node = require([__dirname, "lib", "node"].join("/"));
 var Cache = require("node-cache");
 
-var cache = new Cache({
-    stdTTL: 20,
-    checkperiod: 30
-});
+var cache;
 
 var network;
 var master_query = null;
@@ -40,8 +37,16 @@ function Espial(options){
     this.options = _.defaults(options || {}, {
         network: {},
         master_polling_frequency: 5000,
+        send_presence_frequency: 15000,
         master_eligible: true,
         response_wait: 1000
+    });
+
+    var cache_ttl = (this.options.send_presence_frequency / 1000) * 2;
+
+    cache = new Cache({
+        stdTTL: cache_ttl,
+        checkperiod: cache_ttl
     });
 
     network = new Network(this.options.network, function(){
