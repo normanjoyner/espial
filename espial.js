@@ -27,7 +27,7 @@ var query_for_master = function(self){
 var send_presence = function(self){
     setInterval(function(){
         self.router.internal["core.event.ping"]();
-    }, self.send_presence_frequency);
+    }, self.options.send_presence_frequency);
 }
 
 function Espial(options){
@@ -49,9 +49,10 @@ function Espial(options){
         checkperiod: cache_ttl
     });
 
-    network = new Network(this.options.network, function(){
+    network = new Network(this.options.network, function(node_config){
         self.router = get_router(self);
         node.is_master_eligible = self.options.master_eligible;
+        node.self = node_config;
         poll_for_master(self);
         send_presence(self);
 
@@ -59,7 +60,9 @@ function Espial(options){
             self.router.internal["core.event.node_expired"](key);
         });
 
-        self.router.internal["core.event.connected"]();
+        var subnets = self.options.network.subnets || [node_config.ip];
+
+        self.router.internal["core.event.discover"](subnets);
         self.emit("listening");
     });
 
@@ -90,8 +93,13 @@ Espial.prototype.join = function(event){
     }
 }
 
-Espial.prototype.send = function(event, data){
-    network.send(event, data || {});
+Espial.prototype.send = function(event, data, targets){
+    if(_.isUndefined(targets))
+        var targets = _.values(node.nodes);
+    else if(!_.isArray(targets))
+        var targets = [targets];
+
+    network.send(event, data || {}, targets);
 }
 
 Espial.prototype.promote = function(){
@@ -103,16 +111,24 @@ var get_router = function(self){
     return {
         external: {
 
+            "core.query.discovery": function(data){
+                self.send("core.event.discovered", node.self, data);
+            },
+
+            "core.event.discovered": function(data){
+                var key = data.key;
+                delete data.key;
+                node.nodes[key] = data;
+                self.send("core.event.added_node", node.self, data);
+            },
+
             "core.query.master": function(){
-                if(node.is_master){
-                    self.send("core.response.is_master", {
-                        host_name: network.options.host_name,
-                        ip: network.options.address.local
-                    });
-                }
+                if(node.is_master)
+                    self.send("core.response.is_master", node.self);
             },
 
             "core.response.is_master": function(data){
+                delete data.key;
                 node.current_master = data;
                 clearTimeout(master_query);
             },
@@ -126,8 +142,9 @@ var get_router = function(self){
             },
 
             "core.event.added_node": function(data){
-                node.nodes[data.key] = data;
-                delete node.nodes[data.key].key;
+                var key = data.key;
+                delete data.key;
+                node.nodes[key] = data;
                 self.emit("added_node", data);
             },
 
@@ -138,6 +155,20 @@ var get_router = function(self){
         },
 
         internal: {
+
+            "core.event.discover": function(subnets){
+                _.each(subnets, function(subnet){
+                    var prefix = _.first(subnet.split("."), 3).join(".");
+                    var ips = [];
+
+                    for(start = 2; start <= 254; start++)
+                        ips.push([prefix, start].join("."));
+
+                    _.each(ips, function(ip){
+                        self.send("core.query.discovery", node.self, {ip: ip, port: "11111"});
+                    });
+                });
+            },
 
             "core.event.promote": function(){
                 self.send("core.event.new_master", {
@@ -155,14 +186,6 @@ var get_router = function(self){
                 self.emit("demotion");
             },
 
-            "core.event.connected": function(data){
-                self.send("core.event.added_node", {
-                    key: network.options.key,
-                    host_name: network.options.host_name,
-                    ip: network.options.address.local
-                });
-            },
-
             "core.event.node_expired": function(key){
                 var data = node.nodes[key];
                 delete node.nodes[key];
@@ -170,11 +193,7 @@ var get_router = function(self){
             },
 
             "core.event.ping": function(){
-                self.send("core.event.ping", {
-                    key: network.options.key,
-                    host_name: network.options.host_name,
-                    ip: network.options.address.local
-                });
+                self.send("core.event.ping", node.self);
             }
 
         }
