@@ -60,9 +60,11 @@ function Espial(options){
             self.router.internal["core.event.node_expired"](key);
         });
 
-        var subnets = self.options.network.subnets || [node_config.ip];
+        if(!self.options.network.multicast){
+            var subnets = self.options.network.subnets || [node_config.ip];
+            self.router.internal["core.event.discover"](subnets);
+        }
 
-        self.router.internal["core.event.discover"](subnets);
         self.emit("listening");
     });
 
