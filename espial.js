@@ -12,7 +12,7 @@ var master_query = null;
 var poll_for_master = function(self){
     setInterval(function(){
         if(!node.is_master)
-            query_for_master(self);        
+            query_for_master(self);
     }, self.options.master_polling_frequency);
 }
 
@@ -27,7 +27,7 @@ var query_for_master = function(self){
 var send_presence = function(self){
     setInterval(function(){
         self.router.internal["core.event.ping"]();
-    }, 15000);
+    }, self.send_presence_frequency);
 }
 
 function Espial(options){
@@ -42,7 +42,7 @@ function Espial(options){
         response_wait: 1000
     });
 
-    var cache_ttl = (this.options.send_presence_frequency / 1000) * 2;
+    var cache_ttl = ((this.options.send_presence_frequency / 1000) * 4) + 1;
 
     cache = new Cache({
         stdTTL: cache_ttl,
