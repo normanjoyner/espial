@@ -1,0 +1,47 @@
+{
+  "name": "espial",
+  "version": "0.0.0",
+  "dependencies": {
+    "eventemitter2": {
+      "version": "0.4.13",
+      "from": "eventemitter2@",
+      "resolved": "https://registry.npmjs.org/eventemitter2/-/eventemitter2-0.4.13.tgz"
+    },
+    "getmac": {
+      "version": "1.0.6",
+      "from": "getmac@~1.0.6",
+      "resolved": "https://registry.npmjs.org/getmac/-/getmac-1.0.6.tgz",
+      "dependencies": {
+        "extract-opts": {
+          "version": "2.2.0",
+          "from": "extract-opts@~2.2.0",
+          "resolved": "https://registry.npmjs.org/extract-opts/-/extract-opts-2.2.0.tgz",
+          "dependencies": {
+            "typechecker": {
+              "version": "2.0.8",
+              "from": "typechecker@~2.0.1",
+              "resolved": "https://registry.npmjs.org/typechecker/-/typechecker-2.0.8.tgz"
+            }
+          }
+        }
+      }
+    },
+    "ip": {
+      "version": "0.3.0",
+      "from": "ip@",
+      "resolved": "https://registry.npmjs.org/ip/-/ip-0.3.0.tgz"
+    },
+    "node-cache": {
+      "version": "1.0.0",
+      "from": "node-cache@",
+      "resolved": "https://registry.npmjs.org/node-cache/-/node-cache-1.0.0.tgz",
+      "dependencies": {
+        "underscore": {
+          "version": "1.6.0",
+          "from": "underscore@*",
+          "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.6.0.tgz"
+        }
+      }
+    }
+  }
+}
