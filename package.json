@@ -8,6 +8,9 @@
   },
   "author": "Norman Joyner <norman.joyner@gmail.com>",
   "dependencies": {
-    "getmac": "~1.0.6"
+    "getmac": "~1.0.6",
+    "eventemitter2": "^0.4.13",
+    "ip": "^0.3.0",
+    "node-cache": "^1.0.0"
   }
 }
