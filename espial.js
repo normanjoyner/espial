@@ -64,6 +64,8 @@ function Espial(options){
             var subnets = self.options.network.subnets || [node_config.ip];
             self.router.internal["core.event.discover"](subnets);
         }
+        else
+            self.router.internal["core.event.connected"]();
 
         self.emit("listening");
     });
@@ -194,6 +196,10 @@ var get_router = function(self){
             "core.event.demote": function(data){
                 node.is_master = false;
                 self.emit("demotion");
+            },
+
+            "core.event.connected": function(data){
+                self.send("core.event.added_node", node.self);
             },
 
             "core.event.node_expired": function(key){
