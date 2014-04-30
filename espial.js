@@ -108,6 +108,10 @@ Espial.prototype.send = function(event, data, targets){
         var targets = [targets];
 
     network.send(event, data || {}, targets);
+    if(event == "core.event.ping"){
+        console.log("sending pings to:");
+        console.log(targets);
+    }
 }
 
 Espial.prototype.promote = function(){
@@ -157,6 +161,7 @@ var get_router = function(self){
             },
 
             "core.event.ping": function(data){
+                console.log("received ping from: " + data.key + "/" + data.host_name);
                 cache.set(data.key, data.host_name);
             }
 
