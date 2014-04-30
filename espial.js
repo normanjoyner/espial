@@ -86,6 +86,14 @@ Espial.prototype = Object.create(EventEmitter.prototype, {
     }
 });
 
+Espial.prototype.get_nodes = function(){
+    return _.values(node.nodes);
+}
+
+Espial.prototype.get_master = function(){
+    return node.current_master;
+}
+
 Espial.prototype.join = function(event){
     var self = this;
     this.router.external[event] = function(data){
