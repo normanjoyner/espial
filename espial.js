@@ -165,7 +165,7 @@ var get_router = function(self){
                         ips.push([prefix, start].join("."));
 
                     _.each(ips, function(ip){
-                        self.send("core.query.discovery", node.self, {ip: ip, port: "11111"});
+                        self.send("core.query.discovery", node.self, {ip: ip, port: node.self.port});
                     });
                 });
             },
