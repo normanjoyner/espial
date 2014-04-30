@@ -37,16 +37,17 @@ function Espial(options){
     this.options = _.defaults(options || {}, {
         network: {},
         master_polling_frequency: 5000,
-        send_presence_frequency: 15000,
+        send_presence_frequency: 5000,
         master_eligible: true,
         response_wait: 1000
     });
 
-    var cache_ttl = ((this.options.send_presence_frequency / 1000) * 4) + 1;
+    var cache_ttl = (this.options.send_presence_frequency / 1000) * 3 + 1;
+    var check_period = this.options.send_presence_frequency / 1000;
 
     cache = new Cache({
         stdTTL: cache_ttl,
-        checkperiod: cache_ttl
+        checkperiod: check_period
     });
 
     network = new Network(this.options.network, function(node_config){
@@ -57,6 +58,7 @@ function Espial(options){
         send_presence(self);
 
         cache.on("expired", function(key){
+            console.log(key + " EXPIRED");
             self.router.internal["core.event.node_expired"](key);
         });
 
