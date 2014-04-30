@@ -27,7 +27,7 @@ var query_for_master = function(self){
 var send_presence = function(self){
     setInterval(function(){
         self.router.internal["core.event.ping"]();
-    }, self.send_presence_frequency);
+    }, self.options.send_presence_frequency);
 }
 
 function Espial(options){
@@ -37,29 +37,38 @@ function Espial(options){
     this.options = _.defaults(options || {}, {
         network: {},
         master_polling_frequency: 5000,
-        send_presence_frequency: 15000,
+        send_presence_frequency: 5000,
         master_eligible: true,
         response_wait: 1000
     });
 
-    var cache_ttl = ((this.options.send_presence_frequency / 1000) * 4) + 1;
+    var cache_ttl = (this.options.send_presence_frequency / 1000) * 3 + 1;
+    var check_period = this.options.send_presence_frequency / 1000;
 
     cache = new Cache({
         stdTTL: cache_ttl,
-        checkperiod: cache_ttl
+        checkperiod: check_period
     });
 
-    network = new Network(this.options.network, function(){
+    network = new Network(this.options.network, function(node_config){
         self.router = get_router(self);
         node.is_master_eligible = self.options.master_eligible;
+        node.self = node_config;
         poll_for_master(self);
         send_presence(self);
 
         cache.on("expired", function(key){
+            console.log(key + " EXPIRED");
             self.router.internal["core.event.node_expired"](key);
         });
 
-        self.router.internal["core.event.connected"]();
+        if(self.options.network.multicast == false){
+            var subnets = self.options.network.subnets || [node_config.ip];
+            self.router.internal["core.event.discover"](subnets);
+        }
+        else
+            self.router.internal["core.event.connected"]();
+
         self.emit("listening");
     });
 
@@ -83,6 +92,14 @@ Espial.prototype = Object.create(EventEmitter.prototype, {
     }
 });
 
+Espial.prototype.get_nodes = function(){
+    return _.values(node.nodes);
+}
+
+Espial.prototype.get_master = function(){
+    return node.current_master;
+}
+
 Espial.prototype.join = function(event){
     var self = this;
     this.router.external[event] = function(data){
@@ -90,8 +107,13 @@ Espial.prototype.join = function(event){
     }
 }
 
-Espial.prototype.send = function(event, data){
-    network.send(event, data || {});
+Espial.prototype.send = function(event, data, targets){
+    if(_.isUndefined(targets))
+        var targets = _.values(node.nodes);
+    else if(!_.isArray(targets))
+        var targets = [targets];
+
+    network.send(event, data || {}, targets);
 }
 
 Espial.prototype.promote = function(){
@@ -103,16 +125,24 @@ var get_router = function(self){
     return {
         external: {
 
+            "core.query.discovery": function(data){
+                self.send("core.event.discovered", node.self, data);
+            },
+
+            "core.event.discovered": function(data){
+                var key = data.key;
+                delete data.key;
+                node.nodes[key] = data;
+                self.send("core.event.added_node", node.self, data);
+            },
+
             "core.query.master": function(){
-                if(node.is_master){
-                    self.send("core.response.is_master", {
-                        host_name: network.options.host_name,
-                        ip: network.options.address.local
-                    });
-                }
+                if(node.is_master)
+                    self.send("core.response.is_master", node.self);
             },
 
             "core.response.is_master": function(data){
+                delete data.key;
                 node.current_master = data;
                 clearTimeout(master_query);
             },
@@ -126,8 +156,9 @@ var get_router = function(self){
             },
 
             "core.event.added_node": function(data){
-                node.nodes[data.key] = data;
-                delete node.nodes[data.key].key;
+                var key = data.key;
+                delete data.key;
+                node.nodes[key] = data;
                 self.emit("added_node", data);
             },
 
@@ -138,6 +169,20 @@ var get_router = function(self){
         },
 
         internal: {
+
+            "core.event.discover": function(subnets){
+                _.each(subnets, function(subnet){
+                    var prefix = _.first(subnet.split("."), 3).join(".");
+                    var ips = [];
+
+                    for(start = 2; start <= 254; start++)
+                        ips.push([prefix, start].join("."));
+
+                    _.each(ips, function(ip){
+                        self.send("core.query.discovery", node.self, {ip: ip, port: node.self.port});
+                    });
+                });
+            },
 
             "core.event.promote": function(){
                 self.send("core.event.new_master", {
@@ -156,11 +201,7 @@ var get_router = function(self){
             },
 
             "core.event.connected": function(data){
-                self.send("core.event.added_node", {
-                    key: network.options.key,
-                    host_name: network.options.host_name,
-                    ip: network.options.address.local
-                });
+                self.send("core.event.added_node", node.self);
             },
 
             "core.event.node_expired": function(key){
@@ -170,11 +211,7 @@ var get_router = function(self){
             },
 
             "core.event.ping": function(){
-                self.send("core.event.ping", {
-                    key: network.options.key,
-                    host_name: network.options.host_name,
-                    ip: network.options.address.local
-                });
+                self.send("core.event.ping", node.self);
             }
 
         }
