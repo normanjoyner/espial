@@ -58,18 +58,20 @@ function Espial(options){
         send_presence(self);
 
         cache.on("expired", function(key){
-            console.log(key + " EXPIRED");
             self.router.internal["core.event.node_expired"](key);
         });
 
         if(self.options.network.multicast == false){
             var subnets = self.options.network.subnets || [node_config.ip];
             self.router.internal["core.event.discover"](subnets);
+            setTimeout(function(){
+                self.emit("listening");
+            }, self.options.response_wait);
         }
-        else
+        else{
             self.router.internal["core.event.connected"]();
-
-        self.emit("listening");
+            self.emit("listening");
+        }
     });
 
     network.on("message", function(msg){
@@ -185,10 +187,7 @@ var get_router = function(self){
             },
 
             "core.event.promote": function(){
-                self.send("core.event.new_master", {
-                    host_name: network.options.host_name,
-                    ip: network.options.address.local
-                });
+                self.send("core.event.new_master", node.self);
                 node.is_master = true;
                 self.emit("promotion", {
                     previous_master: node.current_master
