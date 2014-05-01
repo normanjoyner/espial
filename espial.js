@@ -2,6 +2,7 @@ var _ = require("lodash");
 var Network = require([__dirname, "lib", "network"].join("/"));
 var EventEmitter = require("eventemitter2").EventEmitter2;
 var node = require([__dirname, "lib", "node"].join("/"));
+var nodes = require([__dirname, "lib", "nodes"].join("/"));
 var elect = require([__dirname, "lib", "elect"].join("/"));
 var heartbeat = require([__dirname, "lib", "heartbeat"].join("/"));
 
@@ -113,7 +114,7 @@ Espial.prototype.leave = function(event){
 
 Espial.prototype.send = function(event, data, targets){
     if(_.isUndefined(targets))
-        var targets = _.values(node.list);
+        var targets = _.values(nodes.list);
     else if(!_.isArray(targets))
         var targets = [targets];
 
