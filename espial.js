@@ -106,6 +106,11 @@ Espial.prototype.join = function(event){
     }
 }
 
+Espial.prototype.leave = function(event){
+    if(_.has(this.custom, event))
+        delete this.custom[event];
+}
+
 Espial.prototype.send = function(event, data, targets){
     if(_.isUndefined(targets))
         var targets = _.values(node.list);
