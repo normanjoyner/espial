@@ -58,12 +58,12 @@ function Espial(options){
 
     network.on("message", function(msg){
         if(_.has(self.external, msg.event))
-            var call = self.external;
+            var handler = self.external;
         else if(_.has(self.custom, msg.event))
-            var call = self.custom;
+            var handler = self.custom;
 
-        if(!_.isUndefined(fn))
-            call[msg.event](msg.data);
+        if(!_.isUndefined(handler))
+            handler[msg.event](msg.data);
     });
 
     network.on("error", function(err){
