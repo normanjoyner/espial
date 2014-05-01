@@ -15,6 +15,18 @@ Ultimately, Espial was written to encourage the creation of highly available app
 ###Author
 * Norman Joyner - <norman@brandingbrand.com>
 
+###Events
+The following are core events provided by Espial. These events cannot be overwritten by custom user events.
+
+* `listening` - emits when Espial has started
+* `added_node` - emits when a new node enters the cluster
+* `removed_node` - emits when a node leaves the cluster
+* `new_master` - emits when a new master has been elected
+* `promotion` - emits when this node is promoted to master
+* `demotion` - emits when this node is demoted from master
+
+Custom user events can be registered and listened for like any core event. To start listening for a specific event, call `espial.join("event_name")`. Similarly, when espial should no longer care about a custom event, simply remove the event listener by calling `espial.leave("event_name")`. 
+
 ##Getting Started
 
 ###Installation
