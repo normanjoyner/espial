@@ -19,6 +19,3 @@ Ultimately, Espial was written to encourage the creation of highly available app
 
 ###Installation
 ```npm install espial```
-
-###Dependencies
-```npm install```
