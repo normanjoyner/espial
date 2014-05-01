@@ -2,38 +2,34 @@ var _ = require("lodash");
 var Network = require([__dirname, "lib", "network"].join("/"));
 var EventEmitter = require("eventemitter2").EventEmitter2;
 var node = require([__dirname, "lib", "node"].join("/"));
-var Cache = require("node-cache");
-
-var cache;
+var elect = require([__dirname, "lib", "elect"].join("/"));
+var heartbeat = require([__dirname, "lib", "heartbeat"].join("/"));
 
 var network;
-var master_query = null;
-
-var poll_for_master = function(self){
-    setInterval(function(){
-        if(!node.is_master)
-            query_for_master(self);
-    }, self.options.master_polling_frequency);
-}
-
-var query_for_master = function(self){
-    self.send("core.query.master");
-    master_query = setTimeout(function(){
-        if(node.is_master_eligible)
-            self.router.internal["core.event.promote"]();
-    }, self.options.response_wait);
-}
-
-var send_presence = function(self){
-    setInterval(function(){
-        self.router.internal["core.event.ping"]();
-    }, self.options.send_presence_frequency);
-}
 
 function Espial(options){
+    var self = this;
     EventEmitter.call(this);
 
-    var self = this;
+    var required_libs = [
+        "heartbeat",
+        "node",
+        "nodes",
+        "discovery",
+        "elect"
+    ]
+
+    this.internal = {};
+    this.external = {};
+    this.custom= {};
+
+    _.each(required_libs, function(lib){
+        lib = require([__dirname, "lib", lib].join("/"));
+        lib.init(self); 
+        self.internal = _.merge(self.internal, lib.events.internal || {});
+        self.external = _.merge(self.external, lib.events.external|| {});
+    });
+
     this.options = _.defaults(options || {}, {
         network: {},
         master_polling_frequency: 5000,
@@ -42,43 +38,32 @@ function Espial(options){
         response_wait: 1000
     });
 
-    var cache_ttl = (this.options.send_presence_frequency / 1000) * 3 + 1;
-    var check_period = this.options.send_presence_frequency / 1000;
-
-    cache = new Cache({
-        stdTTL: cache_ttl,
-        checkperiod: check_period
-    });
-
     network = new Network(this.options.network, function(node_config){
-        self.router = get_router(self);
-        node.is_master_eligible = self.options.master_eligible;
-        node.self = node_config;
-        poll_for_master(self);
-        send_presence(self);
-
-        cache.on("expired", function(key){
-            self.router.internal["core.event.node_expired"](key);
-        });
+        node.master_eligible = self.options.master_eligible;
+        node.attributes = node_config;
+        elect.master_poll(self);
+        heartbeat.heartbeat(self);
 
         if(self.options.network.multicast == false){
             var subnets = self.options.network.subnets || [node_config.ip];
-            self.router.internal["core.event.discover"](subnets);
-            setTimeout(function(){
-                self.emit("listening");
-            }, self.options.response_wait);
+            self.internal["core.event.discover"](subnets);
         }
-        else{
-            self.router.internal["core.event.connected"]();
+        else
+            self.internal["core.event.connected"]();
+
+        setTimeout(function(){
             self.emit("listening");
-        }
+        }, self.options.response_wait);
     });
 
     network.on("message", function(msg){
-        if(self.router.external[msg.event])
-            self.router.external[msg.event](msg.data);
-        else
-            console.log("no handler found for " + msg.event);
+        if(_.has(self.external, msg.event))
+            var call = self.external;
+        else if(_.has(self.custom, msg.event))
+            var call = self.custom;
+
+        if(!_.isUndefined(fn))
+            call[msg.event](msg.data);
     });
 
     network.on("error", function(err){
@@ -95,23 +80,35 @@ Espial.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Espial.prototype.get_nodes = function(){
-    return _.values(node.nodes);
+    return _.values(nodes.list);
 }
 
 Espial.prototype.get_master = function(){
-    return node.current_master;
+    return nodes.master;
 }
 
 Espial.prototype.join = function(event){
     var self = this;
-    this.router.external[event] = function(data){
-        self.emit(event, data);
+
+    var reserved_commands = [
+        "listening",
+        "promotion",
+        "demotion",
+        "new_master",
+        "added_node",
+        "removed_node"
+    ]
+
+    if(!_.contains(reserved_commands, event)){
+        this.custom[event] = function(data){
+            self.emit(event, data);
+        }
     }
 }
 
 Espial.prototype.send = function(event, data, targets){
     if(_.isUndefined(targets))
-        var targets = _.values(node.nodes);
+        var targets = _.values(node.list);
     else if(!_.isArray(targets))
         var targets = [targets];
 
@@ -120,101 +117,7 @@ Espial.prototype.send = function(event, data, targets){
 
 Espial.prototype.promote = function(){
     if(node.is_master_eligible)
-        this.router.internal["core.event.promote"]();
-}
-
-var get_router = function(self){
-    return {
-        external: {
-
-            "core.query.discovery": function(data){
-                self.send("core.event.discovered", node.self, data);
-            },
-
-            "core.event.discovered": function(data){
-                var key = data.key;
-                delete data.key;
-                node.nodes[key] = data;
-                self.send("core.event.added_node", node.self, data);
-            },
-
-            "core.query.master": function(){
-                if(node.is_master)
-                    self.send("core.response.is_master", node.self);
-            },
-
-            "core.response.is_master": function(data){
-                delete data.key;
-                node.current_master = data;
-                clearTimeout(master_query);
-            },
-
-            "core.event.new_master": function(data){
-                if(node.is_master)
-                    self.router.internal["core.event.demote"]();
-
-                self.router.external["core.response.is_master"](data);
-                self.emit("new_master", node.current_master);
-            },
-
-            "core.event.added_node": function(data){
-                var key = data.key;
-                delete data.key;
-                node.nodes[key] = data;
-                self.emit("added_node", data);
-            },
-
-            "core.event.ping": function(data){
-                cache.set(data.key, data.host_name);
-            }
-
-        },
-
-        internal: {
-
-            "core.event.discover": function(subnets){
-                _.each(subnets, function(subnet){
-                    var prefix = _.first(subnet.split("."), 3).join(".");
-                    var ips = [];
-
-                    for(start = 2; start <= 254; start++)
-                        ips.push([prefix, start].join("."));
-
-                    _.each(ips, function(ip){
-                        self.send("core.query.discovery", node.self, {ip: ip, port: node.self.port});
-                    });
-                });
-            },
-
-            "core.event.promote": function(){
-                self.send("core.event.new_master", node.self);
-                node.is_master = true;
-                self.emit("promotion", {
-                    previous_master: node.current_master
-                });
-            },
-
-            "core.event.demote": function(data){
-                node.is_master = false;
-                self.emit("demotion");
-            },
-
-            "core.event.connected": function(data){
-                self.send("core.event.added_node", node.self);
-            },
-
-            "core.event.node_expired": function(key){
-                var data = node.nodes[key];
-                delete node.nodes[key];
-                self.emit("removed_node", data);
-            },
-
-            "core.event.ping": function(){
-                self.send("core.event.ping", node.self);
-            }
-
-        }
-    }
+        this.internal["core.event.promote"]();
 }
 
 module.exports = Espial;
