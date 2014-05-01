@@ -15,6 +15,11 @@ Ultimately, Espial was written to encourage the creation of highly available app
 ###Author
 * Norman Joyner - <norman@brandingbrand.com>
 
+##Getting Started
+
+###Installation
+```npm install espial```
+
 ###Events
 The following are core events provided by Espial. These events cannot be overwritten by custom user events.
 
@@ -26,8 +31,3 @@ The following are core events provided by Espial. These events cannot be overwri
 * `demotion` - emits when this node is demoted from master
 
 Custom user events can be registered and listened for like any core event. To start listening for a specific event, call `espial.join("event_name")`. Similarly, when espial should no longer care about a custom event, simply remove the event listener by calling `espial.leave("event_name")`. 
-
-##Getting Started
-
-###Installation
-```npm install espial```
