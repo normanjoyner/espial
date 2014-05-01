@@ -11,6 +11,7 @@
     "getmac": "~1.0.6",
     "eventemitter2": "^0.4.13",
     "ip": "^0.3.0",
-    "node-cache": "^1.0.0"
+    "node-cache": "^1.0.0",
+    "node-aes-gcm": "^0.1.3"
   }
 }
