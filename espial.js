@@ -21,11 +21,11 @@ function Espial(options){
 
     this.internal = {};
     this.external = {};
-    this.custom= {};
+    this.custom = {};
 
     _.each(required_libs, function(lib){
         lib = require([__dirname, "lib", lib].join("/"));
-        lib.init(self); 
+        lib.init(self);
         self.internal = _.merge(self.internal, lib.events.internal || {});
         self.external = _.merge(self.external, lib.events.external|| {});
     });
