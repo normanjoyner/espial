@@ -126,4 +126,8 @@ Espial.prototype.promote = function(){
         this.internal["core.event.promote"]();
 }
 
+Espial.prototype.connection_filter = function(fn){
+    nodes.connection_filter = fn;
+}
+
 module.exports = Espial;
