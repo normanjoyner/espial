@@ -130,4 +130,8 @@ Espial.prototype.connection_filter = function(fn){
     nodes.connection_filter = fn;
 }
 
+Espial.prototype.is_master = function(){
+    return node.is_master();
+}
+
 module.exports = Espial;
