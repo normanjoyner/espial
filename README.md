@@ -47,4 +47,4 @@ espial.connection_filter(function(data){
 });
 ```
 
-Once a node is connected to the cluster, Espial encrypts all traffic using 128-bit aes-gcm authenticated encryption. The aes key used is unique for each pair of nodes, and is generated using Diffie-Hellman key exchange upon connection. Initialization vectors are never reused. Since Espial does not require a pre-shared key to perform encryption, there is no fear of having that key compromised. Additionally, you will never need to worry about rotating the key, as it will automatically rotate upon node restart.
+Once a node is connected to the cluster, Espial encrypts all traffic using 128-bit aes-gcm authenticated encryption. The aes key used is unique for each pair of nodes, and is generated using Diffie-Hellman key exchange upon connection. Initialization vectors are never reused. Since Espial does not require a pre-shared key to perform encryption, there is no fear of having that key compromised. Additionally, key rotation is made easy by simply restarting the node.
