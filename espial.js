@@ -43,6 +43,7 @@ function Espial(options){
         node.master_eligible = self.options.master_eligible;
         node.attributes = node_config;
         heartbeat.heartbeat(self);
+        heartbeat.setup_cache();
 
         if(self.options.network.multicast == false){
             var subnets = self.options.network.subnets || [node_config.ip];
