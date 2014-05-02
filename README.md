@@ -20,6 +20,10 @@ Ultimately, Espial was written to encourage the creation of highly available app
 ###Installation
 ```npm install espial```
 
+###Configuration
+
+##Features
+
 ###Events
 The following are core events provided by Espial. These events cannot be overwritten by custom user events.
 
@@ -30,4 +34,17 @@ The following are core events provided by Espial. These events cannot be overwri
 * `promotion` - emits when this node is promoted to master
 * `demotion` - emits when this node is demoted from master
 
-Custom user events can be registered and listened for like any core event. To start listening for a specific event, call `espial.join("event_name")`. Similarly, when espial should no longer care about a custom event, simply remove the event listener by calling `espial.leave("event_name")`. 
+Custom user events can be registered and listened for like any core event. To start listening for a specific event, call `espial.join("event_name")`. Similarly, when espial should no longer care about a custom event, simply remove the event listener by calling `espial.leave("event_name")`.
+
+###Security
+By default, any node can connect to an existing Espial cluster. Since this may not be desirable, filters can be enforced which require a connecting node to meet certain criteria, before being added to the cluster. After configuring your node, simply call ```espial.connection_filter()```, passing it a function which returns a boolean value. If the function returns true, the node is accepted, otherwise it is rejected. For example, the following filter will only accept nodes if their hostname ends with "org.internal":
+```javascript
+var Espial = require("espial");
+var espial = new Espial();
+
+espial.connection_filter(function(data){
+    return data.host.match(/org.internal$/g) != null;
+});
+```
+
+Once a node is connected to the cluster, Espial encrypts all traffic using 128-bit aes-gcm authenticated encryption. The aes key used is unique for each pair of nodes, and is generated using Diffie-Hellman key exchange upon connection. IV's are never reused. Since Espial does not require a pre-shared key to perform encryption, there is no fear of having that key compromised. Additionally, you will never need to worry about rotating the key, as it will automatically rotate upon node restart.
