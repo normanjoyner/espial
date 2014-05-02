@@ -126,4 +126,13 @@ Espial.prototype.promote = function(){
         this.internal["core.event.promote"]();
 }
 
+Espial.prototype.clean_data = function(data){
+    var data = _.cloneDeep(data);
+    delete data.pubkey;
+    delete data.key;
+    delete data.prime;
+    delete data.master;
+    return data;
+}
+
 module.exports = Espial;
