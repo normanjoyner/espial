@@ -13,7 +13,7 @@ Espial exposes a standard set of events which can be listened for, such as the e
 Ultimately, Espial was written to encourage the creation of highly available applications, without the need to run additional servers, such as a database, to share state. When your application needs to scale out, it performs auto-discovery to add the new nodes; no need to search for a list of peers. Simply fire messages from your application and let Espial handle the heavy lifting.
 
 ###Author
-* Norman Joyner - <norman@brandingbrand.com>
+* Norman Joyner - <norman.joyner@gmail.com>
 
 ##Getting Started
 
