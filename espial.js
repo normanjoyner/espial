@@ -42,7 +42,6 @@ function Espial(options){
     network = new Network(this.options.network, function(node_config){
         node.master_eligible = self.options.master_eligible;
         node.attributes = node_config;
-        elect.master_poll(self);
         heartbeat.heartbeat(self);
 
         if(self.options.network.multicast == false){
@@ -54,6 +53,11 @@ function Espial(options){
 
         setTimeout(function(){
             self.emit("listening");
+
+            if(_.isEmpty(nodes.master))
+                self.internal["core.event.promote"]();
+
+            elect.master_poll();
         }, self.options.response_wait);
     });
 
