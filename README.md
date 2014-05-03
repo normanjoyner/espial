@@ -39,13 +39,13 @@ The following are core events provided by Espial. These events cannot be overwri
 Custom user events can be registered and listened for like any core event. To start listening for a specific event, call `espial.join("event_name")`. Similarly, when espial should no longer care about a custom event, simply remove the event listener by calling `espial.leave("event_name")`.
 
 ###Security
-By default, any node can connect to an existing Espial cluster. Since this may not be desirable, filters can be enforced which require a connecting node to meet certain criteria, before being added to the cluster. After configuring your node, simply call ```espial.connection_filter()```, passing it a function which returns a boolean value. If the function returns true, the node is accepted, otherwise it is rejected. For example, the following filter will only accept nodes if their hostname ends with "org.internal":
+By default, any node can connect to an existing Espial cluster. Since this may not be desirable, filters can be enforced which require a connecting node to meet certain criteria, before being added to the cluster. After configuring your node, simply call ```espial.connection_filter(fn)```, passing it a function which executes a callback with a boolean value. If the callback returns true, the node is accepted, otherwise it is rejected. For example, the following filter will only accept nodes if their hostname ends with "org.internal":
 ```javascript
 var Espial = require("espial");
 var espial = new Espial();
 
-espial.connection_filter(function(data){
-    return data.host.match(/org.internal$/g) != null;
+espial.connection_filter(function(data, fn){
+    fn(data.host.match(/org.internal$/g) != null);
 });
 ```
 
