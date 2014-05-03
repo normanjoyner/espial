@@ -4,7 +4,7 @@ espial
 ##About
 
 ###Description
-Espial is a distributed event layer, specifically written to be leveraged in nodejs applications.
+Espial is a secure distributed event layer, specifically written to be leveraged in nodejs applications.
 
 By default, it uses multicast to find other nodes running Espial and automatically joins the existing cluster. Running in an environment which does not support multicast? Simply let Espial know, and it will perform manual peer discovery.
 
