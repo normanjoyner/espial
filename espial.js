@@ -42,8 +42,8 @@ function Espial(options){
     network = new Network(this.options.network, function(node_config){
         node.master_eligible = self.options.master_eligible;
         node.attributes = node_config;
-        elect.master_poll(self);
         heartbeat.heartbeat(self);
+        heartbeat.setup_cache();
 
         if(self.options.network.multicast == false){
             var subnets = self.options.network.subnets || [node_config.ip];
@@ -54,6 +54,11 @@ function Espial(options){
 
         setTimeout(function(){
             self.emit("listening");
+
+            if(_.isEmpty(nodes.master))
+                self.internal["core.event.promote"]();
+
+            elect.master_poll();
         }, self.options.response_wait);
     });
 
@@ -132,6 +137,15 @@ Espial.prototype.connection_filter = function(fn){
 
 Espial.prototype.is_master = function(){
     return node.is_master();
+}
+
+Espial.prototype.clean_data = function(data){
+    var data = _.cloneDeep(data);
+    delete data.pubkey;
+    delete data.key;
+    delete data.prime;
+    delete data.master;
+    return data;
 }
 
 module.exports = Espial;
