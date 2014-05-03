@@ -28,8 +28,10 @@ Ultimately, Espial was written to encourage the creation of highly available app
 The following are core events provided by Espial. These events cannot be overwritten by custom user events.
 
 * `listening` - emits when Espial has started
-* `added_node` - emits when a new node enters the cluster
-* `removed_node` - emits when a node leaves the cluster
+* `added_node` - emits on exiting nodes when a new node enters the cluster
+* `removed_node` - emits on nodes when another node leaves the cluster
+* `node_accepted` -  emits on a new node if it was accepted to the cluster
+* `node_rejected` - emits on a new node if it was rejected from the cluster
 * `new_master` - emits when a new master has been elected
 * `promotion` - emits when this node is promoted to master
 * `demotion` - emits when this node is demoted from master
