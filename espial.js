@@ -51,6 +51,8 @@ function Espial(options){
         heartbeat.heartbeat(self);
         heartbeat.setup_cache();
 
+        self.emit("listening");
+
         if(self.options.network.multicast == false){
             var subnets = self.options.network.subnets || [self.options.network.address.local];
             self.internal["core.event.discover"](subnets);
@@ -59,8 +61,6 @@ function Espial(options){
             self.internal["core.event.connected"]();
 
         setTimeout(function(){
-            self.emit("listening");
-
             if(_.isEmpty(nodes.master))
                 self.internal["core.event.promote"]();
 
