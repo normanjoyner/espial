@@ -36,17 +36,23 @@ function Espial(options){
         master_polling_frequency: 5000,
         send_presence_frequency: 5000,
         master_eligible: true,
-        response_wait: 1000
+        response_wait: 1000,
+        metadata: {}
     });
 
-    network = new Network(this.options.network, function(node_config){
+    network = new Network(this.options.network, function(){
         node.master_eligible = self.options.master_eligible;
-        node.attributes = node_config;
+        node.attributes = {
+            host_name: self.options.network.host_name,
+            ip: self.options.network.address.local,
+            port: self.options.network.port,
+            key: self.options.network.key
+        }
         heartbeat.heartbeat(self);
         heartbeat.setup_cache();
 
         if(self.options.network.multicast == false){
-            var subnets = self.options.network.subnets || [node_config.ip];
+            var subnets = self.options.network.subnets || [self.options.network.address.local];
             self.internal["core.event.discover"](subnets);
         }
         else
