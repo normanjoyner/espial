@@ -14,5 +14,24 @@
     "node-cache": "^1.0.0",
     "node-aes-gcm": "^0.1.3",
     "lodash": "^2.4.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/normanjoyner/espial.git"
+  },
+  "keywords": [
+    "espial",
+    "distributed",
+    "secure",
+    "event",
+    "emitter",
+    "eventemitter",
+    "layer"
+  ],
+  "license": "GPLv2",
+  "bugs": {
+    "url": "https://github.com/normanjoyner/espial/issues"
+  },
+  "homepage": "https://github.com/normanjoyner/espial"
 }
