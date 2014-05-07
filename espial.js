@@ -46,7 +46,8 @@ function Espial(options){
             host_name: self.options.network.host_name,
             ip: self.options.network.address.local,
             port: self.options.network.port,
-            key: self.options.network.key
+            key: self.options.network.key,
+            start_time: self.options.network.start_time
         }
         heartbeat.heartbeat(self);
         heartbeat.setup_cache();
