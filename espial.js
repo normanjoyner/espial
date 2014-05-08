@@ -58,7 +58,7 @@ function Espial(options){
             self.internal["core.event.discover"](subnets);
         }
         else
-            self.internal["core.event.connected"]();
+            self.internal["core.event.discover"]();
 
         setTimeout(function(){
             if(_.isEmpty(nodes.master))
