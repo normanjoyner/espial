@@ -36,7 +36,7 @@ function Espial(options){
         master_polling_frequency: 5000,
         send_presence_frequency: 5000,
         master_eligible: true,
-        response_wait: 1000,
+        master_election_timeout: 1000,
         metadata: {}
     });
 
@@ -65,7 +65,7 @@ function Espial(options){
                 self.internal["core.event.promote"]();
 
             elect.master_poll();
-        }, self.options.response_wait);
+        }, self.options.master_election_timeout);
     });
 
     network.on("message", function(msg){
