@@ -45,7 +45,7 @@ var Espial = require("espial");
 var espial = new Espial();
 
 espial.connection_filter(function(data, fn){
-    fn(data.host.match(/org.internal$/g) != null);
+    return fn(data.host.match(/org.internal$/g) != null);
 });
 ```
 
