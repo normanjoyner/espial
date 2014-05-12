@@ -154,4 +154,15 @@ Espial.prototype.clean_data = function(data){
     return data;
 }
 
+Espial.prototype.exit = function(fn){
+    var self = this;
+    this.internal["core.event.exit"](function(){
+        heartbeat.clear_heartbeat();
+        elect.clear_master_poll();
+        self.removeAllListeners();
+        network.close();
+        return fn();
+    });
+}
+
 module.exports = Espial;
