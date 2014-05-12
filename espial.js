@@ -123,13 +123,17 @@ Espial.prototype.leave = function(event){
         delete this.custom[event];
 }
 
-Espial.prototype.send = function(event, data, targets){
-    if(_.isUndefined(targets))
-        var targets = _.values(nodes.list);
+Espial.prototype.send = function(event, data, targets, fn){
+    if(_.isFunction(targets)){
+        fn = targets;
+        targets = _.values(nodes.list);
+    }
+    else if(_.isUndefined(targets))
+        targets = _.values(nodes.list);
     else if(!_.isArray(targets))
         var targets = [targets];
 
-    network.send(event, data || {}, targets);
+    network.send(event, data || {}, targets, fn);
 }
 
 Espial.prototype.promote = function(){
