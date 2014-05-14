@@ -60,12 +60,14 @@ function Espial(options){
         else
             self.internal["core.event.discover"]();
 
-        setTimeout(function(){
-            if(_.isEmpty(nodes.master))
-                self.internal["core.event.promote"]();
+        if(node.master_eligible){
+            setTimeout(function(){
+                if(_.isEmpty(nodes.master))
+                    self.internal["core.event.promote"]();
 
-            elect.master_poll();
-        }, self.options.master_election_timeout);
+                elect.master_poll();
+            }, self.options.master_election_timeout);
+        }
     });
 
     network.on("message", function(msg){
