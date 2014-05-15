@@ -1,6 +1,6 @@
 {
   "name": "espial",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A secure distributed event layer for nodejs applications",
   "main": "main.js",
   "scripts": {
