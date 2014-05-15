@@ -153,7 +153,6 @@ Espial.prototype.is_master = function(){
 
 Espial.prototype.clean_data = function(data){
     var data = _.cloneDeep(data);
-    delete data.metadata;
     delete data.pubkey;
     delete data.prime;
     delete data.master;
