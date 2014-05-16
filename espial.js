@@ -160,7 +160,7 @@ Espial.prototype.clean_data = function(data){
 }
 
 Espial.prototype.get_node_info = function(){
-    return node.attributes;
+    return this.clean_data(node.attributes);
 }
 
 Espial.prototype.exit = function(fn){
