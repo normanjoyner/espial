@@ -139,7 +139,7 @@ Espial.prototype.send = function(event, data, targets, fn){
 }
 
 Espial.prototype.promote = function(){
-    if(node.is_master_eligible)
+    if(node.master_eligible)
         this.internal["core.event.promote"]();
 }
 
@@ -157,6 +157,10 @@ Espial.prototype.clean_data = function(data){
     delete data.prime;
     delete data.master;
     return data;
+}
+
+Espial.prototype.get_node_info = function(){
+    return node.attributes;
 }
 
 Espial.prototype.exit = function(fn){
