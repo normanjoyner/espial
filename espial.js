@@ -163,6 +163,10 @@ Espial.prototype.get_node_info = function(){
     return this.clean_data(node.attributes);
 }
 
+Espial.prototype.set_metadata = function(metadata){
+    return node.attributes.metadata = metadata;
+}
+
 Espial.prototype.exit = function(fn){
     var self = this;
     this.internal["core.event.exit"](function(){
