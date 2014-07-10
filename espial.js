@@ -94,7 +94,9 @@ Espial.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Espial.prototype.get_nodes = function(){
-    return _.values(nodes.list);
+    return _.map(nodes.list, function(node, name){
+        return this.clean_data(node);
+    }, this);
 }
 
 Espial.prototype.get_master = function(){
