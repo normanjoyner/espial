@@ -53,12 +53,8 @@ function Espial(options){
 
         self.emit("listening");
 
-        if(self.options.network.multicast == false){
-            var subnets = self.options.network.subnets || [self.options.network.address.local];
-            self.internal["core.event.discover"](subnets);
-        }
-        else
-            self.internal["core.event.discover"]();
+        var subnets = self.options.network.subnets || [self.options.network.address.local];
+        self.internal["core.event.discover"](subnets);
 
         if(node.master_eligible){
             setTimeout(function(){
