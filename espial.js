@@ -40,14 +40,18 @@ function Espial(options){
         metadata: {}
     });
 
+    node.attributes.metadata = this.options.metadata;
+
     network = new Network(this.options.network, function(){
         node.master_eligible = self.options.master_eligible;
-        node.attributes = {
+
+        _.defaults(node.attributes, {
             host_name: self.options.network.host_name,
             ip: self.options.network.address.local,
             port: self.options.network.port,
             id: self.options.network.id
-        }
+        });
+
         heartbeat.heartbeat(self);
         heartbeat.setup_cache();
 
